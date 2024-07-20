@@ -72,7 +72,7 @@ function findHeadlineElements(levels, tokens, options, md) {
       // ruby タグを反映させるためにこの処理を追加
       currentHeading.text = md.render(
         token.content
-          .replace(/\{#.*\}/, '')
+          .replace(/\{(#|\.).*\}/, '')
           .replace(/(\d*\.)\s(.*)/, '$1\\$2') // 番号付きリストへの変換を防ぐ
       ).replace(/<p>|<\/p>|<ol.*>|<\/ol>|<li>|<\/li>/g,'')
        .replace(/(\d*\.)\\(.*)/,'$1 $2');
