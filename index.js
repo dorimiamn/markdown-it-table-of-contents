@@ -51,7 +51,7 @@ const defaults = {
 * @param {*} options Plugin options
 * @returns {Array<HeadlineItem>}
 */
-function findHeadlineElements(levels, tokens, options) {
+function findHeadlineElements(levels, tokens, options, md) {
   const headings = [];
   let currentHeading = null;
 
@@ -68,10 +68,15 @@ function findHeadlineElements(levels, tokens, options) {
       }
     }
     else if (currentHeading && token.type === 'inline') {
+      // 見出しから slug を取り除いて一旦 render させてから、<p> タグを取り除く
+      // ruby タグを反映させるためにこの処理を追加
+      currentHeading.text = md.render(token.content.replace(/\{#.*\}/,'')).replace(/<p>|<\/p>/g,'');
+
+      // slug 用に見出しのテキストを取得する処理は残す
       const textContent = token.children
         .filter((childToken) => childToken.type === 'text' || childToken.type === 'code_inline')
         .reduce((acc, t) => acc + t.content, '');
-      currentHeading.text = textContent;
+
       if (! currentHeading.anchor) {
         currentHeading.anchor = options.slugify(textContent, token.content);
       }
@@ -259,7 +264,7 @@ module.exports = function (md, o) {
     if (options.forceFullToc) {
       throw ("forceFullToc was removed in version 0.5.0. For more information, see https://github.com/Oktavilla/markdown-it-table-of-contents/pull/41");
     } else {
-      const headlineItems = findHeadlineElements(options.includeLevel, gstate.tokens, options);
+      const headlineItems = findHeadlineElements(options.includeLevel, gstate.tokens, options, md);
       const toc = flatHeadlineItemsToNestedTree(headlineItems);
       const html = tocItemToHtml(toc, options, md);
       return html;
