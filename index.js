@@ -70,7 +70,12 @@ function findHeadlineElements(levels, tokens, options, md) {
     else if (currentHeading && token.type === 'inline') {
       // 見出しから slug を取り除いて一旦 render させてから、<p> タグを取り除く
       // ruby タグを反映させるためにこの処理を追加
-      currentHeading.text = md.render(token.content.replace(/\{#.*\}/,'')).replace(/<p>|<\/p>/g,'');
+      currentHeading.text = md.render(
+        token.content
+          .replace(/\{#.*\}/, '')
+          .replace(/(\d*\.)\s(.*)/, '$1\\$2') // 番号付きリストへの変換を防ぐ
+      ).replace(/<p>|<\/p>|<ol.*>|<\/ol>|<li>|<\/li>/g,'')
+       .replace(/(\d*\.)\\(.*)/,'$1 $2');
 
       // slug 用に見出しのテキストを取得する処理は残す
       const textContent = token.children
